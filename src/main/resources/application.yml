@@ -1,0 +1,41 @@
+server:
+  port: 8080
+
+logging:
+  level:
+    root: info
+
+spring:
+  kafka:
+    listener:
+      concurrency: 12
+    consumer:
+      enable-auto-commit: false
+      group-id: risk
+      auto-offset-reset: latest
+      bootstrap-servers: 10.173.245.211:9092,10.173.245.212:9092,10.173.245.213:9092,10.173.245.214:9092
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    # password: 123qwe
+    # 连接池最大连接数（使用负值表示没有限制）
+    pool.max-active: 24
+    # 连接池最大阻塞等待时间（使用负值表示没有限制）
+    pool.max-wait: -1
+    # 连接池中的最大空闲连接
+    pool.max-idle: 24
+    # 连接池中的最小空闲连接
+    pool.min-idle: 0
+    # 连接超时时间（毫秒）
+    timeout: 0
+
+risk:
+  step: 10000
+  needPause: false
+  sleepmillis: 10
+  entrance:
+    name: CSF
