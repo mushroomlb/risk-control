@@ -18,9 +18,9 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
   redis:
-    database: 0
     host: 127.0.0.1
     port: 6379
+    database: 0
     # password: 123qwe
     # 连接池最大连接数（使用负值表示没有限制）
     pool.max-active: 24
@@ -34,8 +34,17 @@ spring:
     timeout: 0
 
 risk:
+  seperatorChar: '^'
   step: 10000
   needPause: false
   sleepmillis: 10
   entrance:
     name: CSF
+  redisAccumulator:
+    threshold: 6
+
+lifecycle:
+  hourTimeout: 2
+  check:
+    initialDelay: 10000
+    fixedRate: 600000

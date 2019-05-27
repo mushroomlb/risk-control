@@ -35,7 +35,9 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-data-redis'
     compile 'org.springframework.boot:spring-boot-starter-web'
     compile 'org.springframework.kafka:spring-kafka:1.0.6.RELEASE'
-    compile "org.apache.commons:commons-lang3:3.8.1"
+    compile 'org.apache.commons:commons-lang3:3.8.1'
+    compile 'org.influxdb:influxdb-java:2.15'
+
     compileOnly 'org.projectlombok:lombok'
     testCompile 'org.springframework.boot:spring-boot-starter-test'
     testCompile 'org.springframework.kafka:spring-kafka-test'
