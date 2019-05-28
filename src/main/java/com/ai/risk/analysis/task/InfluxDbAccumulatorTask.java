@@ -1,18 +1,14 @@
 package com.ai.risk.analysis.task;
 
-import org.influxdb.InfluxDB;
-import org.influxdb.dto.Point;
+import com.ai.risk.analysis.accumulator.ServiceAndInstanceAccumulator;
+import com.ai.risk.analysis.accumulator.ServiceAndIpAccumulator;
+import com.ai.risk.analysis.accumulator.ServiceAndOpCodeAccumulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 将数据写入 InfluxDB
@@ -26,10 +22,13 @@ public class InfluxDbAccumulatorTask {
 	private static final Logger log = LoggerFactory.getLogger(InfluxDbAccumulatorTask.class);
 
 	@Autowired
-	private RedisTemplate redisTemplate;
+	private ServiceAndOpCodeAccumulator serviceAndOpCodeAccumulator;
 
 	@Autowired
-	private InfluxDB influxDB;
+	private ServiceAndIpAccumulator serviceAndIpAccumulator;
+
+	@Autowired
+	private ServiceAndInstanceAccumulator serviceAndInstanceAccumulator;
 
 	/**
 	 * 保留时长
@@ -37,44 +36,12 @@ public class InfluxDbAccumulatorTask {
 	@Value("${lifecycle.hourTimeout}")
 	private int hourTimeout;
 
-	@Scheduled(initialDelay = 15000, fixedRate = 1000 * 60)
+	@Scheduled(initialDelay = 15000, fixedRate = 1000 * 60 * 1)
 	public void scheduled() {
-		long now = System.currentTimeMillis();
-		String prefix = "*";
-		Set<String> keys = redisTemplate.keys(prefix);
-		int cnt = 0;
-		for (String key : keys) {
-			Set<ZSetOperations.TypedTuple<Object>> tuples = redisTemplate.opsForZSet().reverseRangeWithScores(key, 0, 5);
-
-			for (ZSetOperations.TypedTuple<Object> tuple : tuples) {
-				String svcName = key;
-				String opCode = tuple.getValue().toString();
-				int score = tuple.getScore().intValue();
-				write(svcName, opCode, score);
-				cnt++;
-			}
-
-		}
-
-		log.info(String.format("二次聚合: %30s, 本次聚合次数: %6d", "Redis -> InfluxDB", cnt));
+		serviceAndOpCodeAccumulator.toInfluxDb();
+		serviceAndIpAccumulator.toInfluxDb();
+		serviceAndInstanceAccumulator.toInfluxDb();
 	}
 
-
-	/**
-	 *
-	 * @param svcName 服务名
-	 * @param opCode 操作工号
-	 * @param score 调用次数
-	 */
-	private final void write(String svcName, String opCode, int score) {
-		Point point = Point.measurement("service_load")
-			.tag("svcName", svcName)
-			.tag("opCode", opCode)
-			.addField("value", score)
-			.time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
-			.build();
-
-		influxDB.write(point);
-	}
 
 }

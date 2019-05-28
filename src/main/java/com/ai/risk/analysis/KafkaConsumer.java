@@ -1,9 +1,14 @@
 package com.ai.risk.analysis;
 
+import com.ai.risk.analysis.accumulator.ServiceAndInstanceAccumulator;
+import com.ai.risk.analysis.accumulator.ServiceAndIpAccumulator;
+import com.ai.risk.analysis.accumulator.ServiceAndOpCodeAccumulator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -25,6 +30,8 @@ import java.util.concurrent.atomic.AtomicLong;
 @Component
 public class KafkaConsumer {
 
+	private static final Logger log = LoggerFactory.getLogger(KafkaConsumer.class);
+
 	/**
 	 * 入口服务类型
 	 */
@@ -45,15 +52,18 @@ public class KafkaConsumer {
 	 */
 	private static final String TOPIC = "LOG4X-TRACE-TOPIC";
 
-	@Autowired
-	private Map<String, AtomicLong> localCounter;
-
-	@Autowired
-	private RedisTemplate redisTemplate;
-
 	private ObjectMapper mapper = new ObjectMapper();
 	private AtomicLong index = new AtomicLong(0);
 
+
+	@Autowired
+	private ServiceAndOpCodeAccumulator serviceAndOpCodeAccumulator;
+
+	@Autowired
+	private ServiceAndIpAccumulator serviceAndIpAccumulator;
+
+	@Autowired
+	private ServiceAndInstanceAccumulator serviceAndInstanceAccumulator;
 
 	@KafkaListener(topicPartitions = {@TopicPartition(topic = TOPIC, partitions = "0")})
 	public void listen_p0(ConsumerRecord<?, String> record) {
@@ -175,40 +185,20 @@ public class KafkaConsumer {
 		}
 	}
 
-	/**
-	 * 格式: yyyyMMddHH-服务名
-	 *
-	 * @param span
-	 * @param partition
-	 */
-	private void toRedisBAK(Map span, int partition) {
-
-		String callType = (String) span.get("callType");
-		if (entranceName.equals(callType)) {
-			String serviceName = (String) span.get("serviceName");
-			Long startTime = (Long) span.get("startTime");
-			Map extMap = (Map) span.get("ext");
-			String opCode = (String) extMap.get("opCode");
-			if (StringUtils.isBlank(serviceName) || StringUtils.isBlank(opCode)) {
-				return;
+	private String getHostIp(String strHostName) {
+		String[] slice = StringUtils.split(strHostName, ',');
+		if (null != slice) {
+			for (String hostname : slice) {
+				if (!"127.0.0.1".equals(hostname)) {
+					return hostname;
+				}
 			}
-
-			String startTimeStr = DateFormatUtils.format(startTime, "yyyyMMddHH");
-
-			String key = startTimeStr + "-" + serviceName;
-			redisTemplate.opsForZSet().incrementScore(key, opCode, 1);
-
-			if (0 == index.incrementAndGet() % step) {
-				String msg = String.format("%s [%3d] -> %s  %-80s", DateFormatUtils.format(startTime, "yyyy-MM-dd HH:mm:ss"), partition, opCode, serviceName);
-				//System.out.println(msg);
-			}
-
 		}
-
+		return null;
 	}
 
 	/**
-	 * 格式: yyyyMMddHH-服务名
+	 * 本地数据聚合
 	 *
 	 * @param span
 	 * @param partition
@@ -219,28 +209,33 @@ public class KafkaConsumer {
 		if (entranceName.equals(callType)) {
 			String serviceName = (String) span.get("serviceName");
 			Long startTime = (Long) span.get("startTime");
+			Integer elapsedTime = (Integer) span.get("elapsedTime");
+			String ip = getHostIp((String) span.get("hostName"));
+			String instance = (String) span.get("appName");
 			Map extMap = (Map) span.get("ext");
 			String opCode = (String) extMap.get("opCode");
-			if (StringUtils.isBlank(serviceName) || StringUtils.isBlank(opCode)) {
+			if (StringUtils.isBlank(serviceName)) {
 				return;
 			}
 
-			String key = serviceName + seperatorChar + opCode;
-			AtomicLong count = localCounter.get(key);
-			if (null == count) {
-				count = new AtomicLong(0L);
-				localCounter.put(key, count);
-			}
-			count.incrementAndGet();
-
-			if (0 == index.incrementAndGet() % step) {
-				String msg = String.format("%s [%3d] -> %s  %-80s", DateFormatUtils.format(startTime, "yyyy-MM-dd HH:mm:ss"), partition, opCode, serviceName);
-				//System.out.println(msg);
+			if (StringUtils.isNotBlank(opCode)) {
+				serviceAndOpCodeAccumulator.localAccumulation(serviceName, opCode, elapsedTime);
 			}
 
+			if (StringUtils.isNotBlank(ip)) {
+				serviceAndIpAccumulator.localAccumulation(serviceName, ip, elapsedTime);
+			}
+
+			if (StringUtils.isNotBlank(instance)) {
+				serviceAndInstanceAccumulator.localAccumulation(serviceName, instance, elapsedTime);
+			}
+
+			long i = index.incrementAndGet();
+			if (0 == i % 100000) {
+				log.info(DateFormatUtils.format(startTime, "yyyy-MM-dd HH:mm:ss") + " process " + i);
+			}
 		}
 
 	}
-
 
 }

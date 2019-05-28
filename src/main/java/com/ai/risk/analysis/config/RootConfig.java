@@ -1,5 +1,9 @@
 package com.ai.risk.analysis.config;
 
+import com.ai.risk.analysis.Entity;
+import com.ai.risk.analysis.accumulator.ServiceAndInstanceAccumulator;
+import com.ai.risk.analysis.accumulator.ServiceAndIpAccumulator;
+import com.ai.risk.analysis.accumulator.ServiceAndOpCodeAccumulator;
 import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
@@ -28,8 +32,23 @@ public class RootConfig {
 	}
 
 	@Bean
-	public Map<String, AtomicLong> localCounter() {
+	public Map<String, Entity> localCounter() {
 		return new ConcurrentHashMap(100000000);
+	}
+
+	@Bean
+	public ServiceAndOpCodeAccumulator ServiceAndOpCodeAccumulator() {
+		return new ServiceAndOpCodeAccumulator();
+	}
+
+	@Bean
+	public ServiceAndIpAccumulator serviceAndIpAccumulator() {
+		return new ServiceAndIpAccumulator();
+	}
+
+	@Bean
+	public ServiceAndInstanceAccumulator serviceAndInstanceAccumulator() {
+		return new ServiceAndInstanceAccumulator();
 	}
 
 	@Bean
@@ -37,7 +56,7 @@ public class RootConfig {
 		InfluxDB influxDB = InfluxDBFactory.connect("http://127.0.0.1:8086", "admin", "admin");
 		String dbName = "csf_service";
 		influxDB.setDatabase(dbName);
-		influxDB.enableBatch(BatchOptions.DEFAULTS.actions(2000).flushDuration(100));
+		influxDB.enableBatch(BatchOptions.DEFAULTS.actions(5000).flushDuration(1000));
 		influxDB.enableGzip();
 		return influxDB;
 	}

@@ -1,5 +1,6 @@
 package com.ai.risk.analysis.task;
 
+import com.ai.risk.analysis.Entity;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author Steven
  * @date 2019-05-26
  */
-@Component
+// @Component
 public class RedisAccumulatorTask {
 
 	private static final Logger log = LoggerFactory.getLogger(RedisAccumulatorTask.class);
@@ -31,7 +32,7 @@ public class RedisAccumulatorTask {
 	private int threshold;
 
 	@Autowired
-	private Map<String, AtomicLong> localCounter;
+	private Map<String, Entity> localCounter;
 
 	@Autowired
 	private RedisTemplate redisTemplate;
@@ -46,16 +47,18 @@ public class RedisAccumulatorTask {
 
 		int cnt = 0;
 		for (String key : keySet) {
-			AtomicLong score = localCounter.get(key);
-			if (score.get() > threshold) {
-				String[] slice = StringUtils.split(key, seperatorChar);
-				String svnName = slice[0];
-				String opCode = slice[1];
+			Entity entity = localCounter.get(key);
 
-				redisTemplate.opsForZSet().incrementScore(svnName, opCode, score.get());
-				cnt++;
-			}
-			score.set(0L);
+			String[] slice = StringUtils.split(key, seperatorChar);
+			String svnName = slice[0];
+			String opCode = slice[1];
+
+			redisTemplate.opsForHash().increment(svnName, "CNT-" + opCode, entity.getCnt().get());
+			redisTemplate.opsForHash().increment(svnName, "TTC-" + opCode, entity.getTtc().get());
+			cnt++;
+
+			entity.getCnt().set(0L);
+			entity.getTtc().set(0L);
 		}
 
 		log.info(String.format("一次聚合: %30s, 本次聚合次数: %6d", "localCounter -> Redis", cnt));
