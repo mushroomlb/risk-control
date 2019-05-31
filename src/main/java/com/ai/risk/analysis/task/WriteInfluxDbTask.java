@@ -17,9 +17,9 @@ import org.springframework.stereotype.Component;
  * @date 2019-05-26
  */
 @Component
-public class InfluxDbAccumulatorTask {
+public class WriteInfluxDbTask {
 
-	private static final Logger log = LoggerFactory.getLogger(InfluxDbAccumulatorTask.class);
+	private static final Logger log = LoggerFactory.getLogger(WriteInfluxDbTask.class);
 
 	@Autowired
 	private ServiceAndOpCodeAccumulator serviceAndOpCodeAccumulator;
@@ -42,6 +42,5 @@ public class InfluxDbAccumulatorTask {
 		serviceAndIpAccumulator.toInfluxDb();
 		serviceAndInstanceAccumulator.toInfluxDb();
 	}
-
 
 }

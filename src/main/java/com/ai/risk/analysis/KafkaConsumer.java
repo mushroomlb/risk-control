@@ -11,13 +11,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -64,6 +64,9 @@ public class KafkaConsumer {
 
 	@Autowired
 	private ServiceAndInstanceAccumulator serviceAndInstanceAccumulator;
+
+	@Autowired
+	private LinkedBlockingQueue<ServicePoint> linkedBlockingQueue;
 
 	@KafkaListener(topicPartitions = {@TopicPartition(topic = TOPIC, partitions = "0")})
 	public void listen_p0(ConsumerRecord<?, String> record) {
@@ -212,30 +215,74 @@ public class KafkaConsumer {
 			Integer elapsedTime = (Integer) span.get("elapsedTime");
 			String ip = getHostIp((String) span.get("hostName"));
 			String instance = (String) span.get("appName");
+			boolean success = (boolean) span.get("success");
 			Map extMap = (Map) span.get("ext");
 			String opCode = (String) extMap.get("opCode");
-			if (StringUtils.isBlank(serviceName)) {
+
+			if (!assertNotBlank(serviceName, opCode, ip, instance)) {
 				return;
 			}
 
-			if (StringUtils.isNotBlank(opCode)) {
-				serviceAndOpCodeAccumulator.localAccumulation(serviceName, opCode, elapsedTime);
-			}
-
-			if (StringUtils.isNotBlank(ip)) {
-				serviceAndIpAccumulator.localAccumulation(serviceName, ip, elapsedTime);
-			}
-
-			if (StringUtils.isNotBlank(instance)) {
-				serviceAndInstanceAccumulator.localAccumulation(serviceName, instance, elapsedTime);
-			}
+			serviceAndOpCodeAccumulator.localAccumulation(serviceName, opCode, elapsedTime);
+			serviceAndIpAccumulator.localAccumulation(serviceName, ip, elapsedTime);
+			serviceAndInstanceAccumulator.localAccumulation(serviceName, instance, elapsedTime);
+			//putToBlockingQueue(serviceName, opCode, ip, instance, success, startTime, elapsedTime);
 
 			long i = index.incrementAndGet();
 			if (0 == i % 100000) {
-				log.info(DateFormatUtils.format(startTime, "yyyy-MM-dd HH:mm:ss") + " process " + i);
+				log.info(DateFormatUtils.format(startTime, "yyyy-MM-dd HH:mm:ss") + ", 已处理: " + i);
 			}
 		}
 
 	}
 
+	/**
+	 * 基于 disruptor 方式直接将数据不做本地聚合，直接写入 InfluxDB
+	 *
+	 * @param svcName
+	 * @param opCode
+	 * @param ip
+	 * @param instance
+	 * @param success
+	 * @param cost
+	 */
+	private void putToBlockingQueue(String svcName, String opCode, String ip, String instance, boolean success, long startTime, int cost) {
+
+		ServicePoint servicePoint = new ServicePoint();
+		servicePoint.svcName = svcName;
+		servicePoint.opCode = opCode;
+		servicePoint.ip = ip;
+		servicePoint.instance = instance;
+		servicePoint.success = success;
+		servicePoint.startTime = startTime;
+		servicePoint.cost = cost;
+
+		try {
+			linkedBlockingQueue.put(servicePoint);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	private static final boolean assertNotBlank(String serviceName, String opCode, String ip, String instance) {
+
+		if (StringUtils.isBlank(serviceName)) {
+			return false;
+		}
+
+		if (StringUtils.isBlank(opCode)) {
+			return false;
+		}
+
+		if (StringUtils.isBlank(ip)) {
+			return false;
+		}
+
+		if (StringUtils.isBlank(instance)) {
+			return false;
+		}
+
+		return true;
+	}
 }

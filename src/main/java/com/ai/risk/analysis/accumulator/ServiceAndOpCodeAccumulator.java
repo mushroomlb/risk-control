@@ -21,7 +21,7 @@ public class ServiceAndOpCodeAccumulator extends BaseAccumulator {
 		long start = System.currentTimeMillis();
 		int accumulatorCount = super.toInfluxDb(MEASUREMENT, "opCode", 15);
 		long cost = System.currentTimeMillis() - start;
-		log.info(String.format("%30s, 聚合: %6d 条, 耗时(ms): %5d", "save to InfluxDB", accumulatorCount, cost));
+		log.info(String.format("%s 聚合: %6d 条, 耗时(ms): %5d", "write to InfluxDB", accumulatorCount, cost));
 	}
 
 }

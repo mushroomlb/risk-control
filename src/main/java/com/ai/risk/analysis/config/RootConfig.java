@@ -17,7 +17,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author Steven
@@ -53,7 +52,7 @@ public class RootConfig {
 
 	@Bean
 	public InfluxDB influxDB() {
-		InfluxDB influxDB = InfluxDBFactory.connect("http://127.0.0.1:8086", "admin", "admin");
+		InfluxDB influxDB = InfluxDBFactory.connect("http://10.174.59.41:8086", "admin", "admin");
 		String dbName = "csf_service";
 		influxDB.setDatabase(dbName);
 		influxDB.enableBatch(BatchOptions.DEFAULTS.actions(5000).flushDuration(1000));

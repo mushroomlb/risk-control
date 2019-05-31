@@ -48,6 +48,16 @@ public class BaseAccumulator {
 
 		// 递增调用耗时
 		entity.getTtc().addAndGet(elapsedTime);
+
+		// 条件满足时,设置最高耗时
+		if (elapsedTime < entity.getMinCost()) {
+			entity.setMinCost(elapsedTime);
+		}
+
+		// 条件满足时,设置最高耗时
+		if (elapsedTime > entity.getMaxCost()) {
+			entity.setMaxCost(elapsedTime);
+		}
 	}
 
 	/**
@@ -68,10 +78,14 @@ public class BaseAccumulator {
 
 			long cnt = entity.getCnt().longValue();
 			long ttc = entity.getTtc().longValue();
+			int minCost = entity.getMinCost();
+			int maxCost = entity.getMaxCost();
 
 			// 计数器清零
 			entity.getCnt().set(0L);
 			entity.getTtc().set(0L);
+			entity.setMinCost(Integer.MAX_VALUE);
+			entity.setMaxCost(0);
 
 			if (0 == cnt || cnt < threshold) {
 				// 只统计周期内总调用次数大于阀值的
@@ -85,7 +99,7 @@ public class BaseAccumulator {
 			String svcName = slice[0];
 			String tagValue = slice[1];
 
-			write(measurement, svcName, tagName, tagValue, cnt, cost);
+			write(measurement, svcName, tagName, tagValue, cnt, cost, minCost, maxCost);
 			count++;
 		}
 
@@ -99,12 +113,14 @@ public class BaseAccumulator {
 	 * @param cnt 调用次数
 	 * @param cost 总耗时
 	 */
-	private void write(String measurement, String svcName, String tagName, String tagValue, long cnt, long cost) {
+	private void write(String measurement, String svcName, String tagName, String tagValue, long cnt, long cost, int minCost, int maxCost) {
 		Point point = Point.measurement(measurement)
 			.tag("svcName", svcName)
 			.tag(tagName, tagValue)
 			.addField("cnt", cnt)
 			.addField("cost", cost)
+			.addField("minCost", minCost)
+			.addField("maxCost", maxCost)
 			.time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
 			.build();
 
