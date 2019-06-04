@@ -7,7 +7,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
+ * 工号调用量累加器
+ *
  * @author Steven
+ * @date 2019-06-04
  */
 @Component
 public class OpCodeAccumulator {

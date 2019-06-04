@@ -11,15 +11,15 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * 将数据写入 InfluxDB
+ * Influxdb 聚合
  *
  * @author Steven
  * @date 2019-05-26
  */
 @Component
-public class InfluxDbSinkTask {
+public class InfluxdbSinkTask {
 
-	private static final Logger log = LoggerFactory.getLogger(InfluxDbSinkTask.class);
+	private static final Logger log = LoggerFactory.getLogger(InfluxdbSinkTask.class);
 
 	@Autowired
 	private ServiceAndOpCodeAccumulator serviceAndOpCodeAccumulator;

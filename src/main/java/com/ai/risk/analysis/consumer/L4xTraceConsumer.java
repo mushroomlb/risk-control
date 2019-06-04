@@ -22,16 +22,17 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * 消费者
+ * LOG4X-TRACE-TOPIC 消费者
+ *
  * 使用 @KafkaListener 注解, 可以指定: 主题, 分区, 消费组
  *
  * @author Steven
  * @date 2019-05-24
  */
 @Component
-public class KafkaConsumer {
+public class L4xTraceConsumer {
 
-	private static final Logger log = LoggerFactory.getLogger(KafkaConsumer.class);
+	private static final Logger log = LoggerFactory.getLogger(L4xTraceConsumer.class);
 
 	/**
 	 * 链路 Topic

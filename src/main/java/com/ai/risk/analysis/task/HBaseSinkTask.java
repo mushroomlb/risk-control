@@ -10,7 +10,10 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
+ * HBase聚合
+ *
  * @author Steven
+ * @date 2019-06-04
  */
 @Component
 public class HBaseSinkTask {

@@ -6,7 +6,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
+ * 服务 + IP累加器
+ *
  * @author Steven
+ * @date 2019-06-04
  */
 @Component
 public class ServiceAndIpAccumulator extends BaseAccumulator {
