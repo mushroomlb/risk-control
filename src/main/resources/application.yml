@@ -19,9 +19,9 @@ spring:
   hbase:
     zookeeper:
       server-list: 10.174.25.117:2181,10.174.25.118:2181,10.174.25.119:2181,10.174.25.120:2181,10.174.25.121:2181
-    service-talbe: SERVICE_INFO
-    opcode-table: OPCODE_INFO
-    ttl: 15552000000
+    service-talbe: service
+    opcode-table: opcode
+    ttl: 15552000
 
 risk:
   seperatorChar: '^'

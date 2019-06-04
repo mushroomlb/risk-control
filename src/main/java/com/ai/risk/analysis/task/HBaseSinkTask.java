@@ -2,11 +2,15 @@ package com.ai.risk.analysis.task;
 
 import com.ai.risk.analysis.accumulator.hbase.OpCodeAccumulator;
 import com.ai.risk.analysis.accumulator.hbase.ServiceAccumulator;
+import com.ai.risk.analysis.lijun.bean.CallCountUnit;
+import com.ai.risk.analysis.lijun.util.HbaseOps;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -19,6 +23,8 @@ import java.util.concurrent.atomic.AtomicLong;
 @Component
 public class HBaseSinkTask {
 
+	@Autowired
+	private HbaseOps hbaseOps;
 
 	@Autowired
 	private ServiceAccumulator serviceAggregate;
@@ -30,23 +36,35 @@ public class HBaseSinkTask {
 	//@Scheduled(cron = "0 0 * * * ?") // 整点执行一次
 	public void scheduled() {
 
-
 		Map<String, AtomicLong> serviceLocalCounts = serviceAggregate.getLocalCounts();
 		Map<String, AtomicLong> opCodeLocalCounts = opCodeAggregate.getLocalCounts();
 
 		String now = DateFormatUtils.format(System.currentTimeMillis(), "yyyyMMddHHmm");
 		String rowNamePrefix = now + "-" ;
 
+		List<CallCountUnit> serviceList = new ArrayList();
+		List<CallCountUnit> opcodeList = new ArrayList();
 		for (String svcName : serviceLocalCounts.keySet()) {
-			long cnt = serviceLocalCounts.get(svcName).get();
-			String rowName = rowNamePrefix + svcName;
+			String cnt = serviceLocalCounts.get(svcName).toString();
+
+			CallCountUnit unit = new CallCountUnit();
+			unit.setName(svcName);
+			unit.setNumber(cnt);
+			serviceList.add(unit);
+
+			hbaseOps.serviceAccumulator(now, serviceList);
 
 		}
 		serviceLocalCounts.clear();
 
 		for (String opCode : opCodeLocalCounts.keySet()) {
-			long cnt = opCodeLocalCounts.get(opCode).get();
-			String rowName = rowNamePrefix + opCode;
+			String cnt = opCodeLocalCounts.get(opCode).toString();
+			CallCountUnit unit = new CallCountUnit();
+			unit.setName(opCode);
+			unit.setNumber(cnt);
+			opcodeList.add(unit);
+
+			hbaseOps.opcodeAccumulator(now, opcodeList);
 
 		}
 		opCodeLocalCounts.clear();
