@@ -1,0 +1,18 @@
+create 'service', 'info'
+alter  'service', {NAME => 'info', TTL => '15552000'}
+
+create 'opcode', 'info'
+alter  'opcode', {NAME => 'info', TTL => '15552000'}
+
+
+hbase:
+  zookeeper:
+    quorum: 10.174.25.117,10.174.25.118,10.174.25.119,10.174.25.120,10.174.25.121
+    property:
+      clientPort: 2181
+
+zookeeper:
+  znode:
+    parent: /hbase
+
+hbaseTemplate.put("service", rowName, "info", "cnt", String.valueOf(cnt).getBytes());
