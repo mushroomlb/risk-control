@@ -1,9 +1,6 @@
 package com.ai.risk.analysis.config;
 
-import com.ai.risk.analysis.Entity;
-import com.ai.risk.analysis.accumulator.ServiceAndInstanceAccumulator;
-import com.ai.risk.analysis.accumulator.ServiceAndIpAccumulator;
-import com.ai.risk.analysis.accumulator.ServiceAndOpCodeAccumulator;
+import com.ai.risk.analysis.accumulator.CntUnit;
 import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
@@ -31,23 +28,8 @@ public class RootConfig {
 	}
 
 	@Bean
-	public Map<String, Entity> localCounter() {
+	public Map<String, CntUnit> localCounter() {
 		return new ConcurrentHashMap(100000000);
-	}
-
-	@Bean
-	public ServiceAndOpCodeAccumulator ServiceAndOpCodeAccumulator() {
-		return new ServiceAndOpCodeAccumulator();
-	}
-
-	@Bean
-	public ServiceAndIpAccumulator serviceAndIpAccumulator() {
-		return new ServiceAndIpAccumulator();
-	}
-
-	@Bean
-	public ServiceAndInstanceAccumulator serviceAndInstanceAccumulator() {
-		return new ServiceAndInstanceAccumulator();
 	}
 
 	@Bean

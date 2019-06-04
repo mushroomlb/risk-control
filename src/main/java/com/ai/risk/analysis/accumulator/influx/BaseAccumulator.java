@@ -1,6 +1,6 @@
-package com.ai.risk.analysis.accumulator;
+package com.ai.risk.analysis.accumulator.influx;
 
-import com.ai.risk.analysis.Entity;
+import com.ai.risk.analysis.accumulator.CntUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Point;
@@ -26,7 +26,7 @@ public class BaseAccumulator {
 	@Autowired
 	private InfluxDB influxDB;
 
-	private Map<String, Entity> accumulator = new ConcurrentHashMap<>();
+	private Map<String, CntUnit> accumulator = new ConcurrentHashMap<>();
 
 	/**
 	 * 本地数据汇总
@@ -37,9 +37,9 @@ public class BaseAccumulator {
 	 */
 	void accumulation(String svcName, String suffix, int elapsedTime) {
 		String key = svcName + seperatorChar + suffix;
-		Entity entity = accumulator.get(key);
+		CntUnit entity = accumulator.get(key);
 		if (null == entity) {
-			entity = new Entity();
+			entity = new CntUnit();
 			accumulator.put(key, entity);
 		}
 
@@ -74,7 +74,7 @@ public class BaseAccumulator {
 
 		int count = 0;
 		for (String key : keySet) {
-			Entity entity = accumulator.get(key);
+			CntUnit entity = accumulator.get(key);
 
 			long cnt = entity.getCnt().longValue();
 			long ttc = entity.getTtc().longValue();

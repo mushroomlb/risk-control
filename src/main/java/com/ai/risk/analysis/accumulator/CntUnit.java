@@ -1,22 +1,14 @@
-package com.ai.risk.analysis;
+package com.ai.risk.analysis.accumulator;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
+ * 技术单元
+ *
  * @author Steven
  * @date 2019-05-27
  */
-public class Entity {
-
-	/**
-	 * 服务名
-	 */
-	private String svcName;
-
-	/**
-	 * 主机名/
-	 */
-	private String hostIp;
+public class CntUnit {
 
 	/**
 	 * 调用次数
@@ -38,41 +30,18 @@ public class Entity {
 	 */
 	private int maxCost = 0;
 
-	public Entity() {
+	public CntUnit() {
 		this.cnt = new AtomicLong(0L);
 		this.ttc = new AtomicLong(0L);
 	}
 
-	public String getSvcName() {
-		return svcName;
-	}
-
-	public void setSvcName(String svcName) {
-		this.svcName = svcName;
-	}
-
-	public String getIp() {
-		return hostIp;
-	}
-
-	public void setIp(String ip) {
-		this.hostIp = ip;
-	}
 
 	public AtomicLong getCnt() {
 		return cnt;
 	}
 
-	public void setCnt(AtomicLong cnt) {
-		this.cnt = cnt;
-	}
-
 	public AtomicLong getTtc() {
 		return ttc;
-	}
-
-	public void setTtc(AtomicLong ttc) {
-		this.ttc = ttc;
 	}
 
 	public int getMinCost() {
@@ -90,4 +59,5 @@ public class Entity {
 	public void setMaxCost(int maxCost) {
 		this.maxCost = maxCost;
 	}
+
 }

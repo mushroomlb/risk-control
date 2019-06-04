@@ -1,8 +1,8 @@
 package com.ai.risk.analysis.task;
 
-import com.ai.risk.analysis.accumulator.ServiceAndInstanceAccumulator;
-import com.ai.risk.analysis.accumulator.ServiceAndIpAccumulator;
-import com.ai.risk.analysis.accumulator.ServiceAndOpCodeAccumulator;
+import com.ai.risk.analysis.accumulator.influx.ServiceAndInstanceAccumulator;
+import com.ai.risk.analysis.accumulator.influx.ServiceAndIpAccumulator;
+import com.ai.risk.analysis.accumulator.influx.ServiceAndOpCodeAccumulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +17,9 @@ import org.springframework.stereotype.Component;
  * @date 2019-05-26
  */
 @Component
-public class WriteInfluxDbTask {
+public class InfluxDbSinkTask {
 
-	private static final Logger log = LoggerFactory.getLogger(WriteInfluxDbTask.class);
+	private static final Logger log = LoggerFactory.getLogger(InfluxDbSinkTask.class);
 
 	@Autowired
 	private ServiceAndOpCodeAccumulator serviceAndOpCodeAccumulator;
