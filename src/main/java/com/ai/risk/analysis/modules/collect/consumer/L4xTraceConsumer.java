@@ -1,10 +1,10 @@
-package com.ai.risk.analysis.consumer;
+package com.ai.risk.analysis.modules.collect.consumer;
 
-import com.ai.risk.analysis.accumulator.influx.ServiceAndInstanceAccumulator;
-import com.ai.risk.analysis.accumulator.influx.ServiceAndIpAccumulator;
-import com.ai.risk.analysis.accumulator.influx.ServiceAndOpCodeAccumulator;
-import com.ai.risk.analysis.accumulator.hbase.OpCodeAccumulator;
-import com.ai.risk.analysis.accumulator.hbase.ServiceAccumulator;
+import com.ai.risk.analysis.modules.collect.accumulator.influx.ServiceAndInstanceAccumulator;
+import com.ai.risk.analysis.modules.collect.accumulator.influx.ServiceAndIpAccumulator;
+import com.ai.risk.analysis.modules.collect.accumulator.influx.ServiceAndOpCodeAccumulator;
+import com.ai.risk.analysis.modules.collect.accumulator.hbase.OpCodeAccumulator;
+import com.ai.risk.analysis.modules.collect.accumulator.hbase.ServiceAccumulator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;

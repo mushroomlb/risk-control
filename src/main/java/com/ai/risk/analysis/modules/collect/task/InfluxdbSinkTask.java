@@ -1,8 +1,8 @@
-package com.ai.risk.analysis.task;
+package com.ai.risk.analysis.modules.collect.task;
 
-import com.ai.risk.analysis.accumulator.influx.ServiceAndInstanceAccumulator;
-import com.ai.risk.analysis.accumulator.influx.ServiceAndIpAccumulator;
-import com.ai.risk.analysis.accumulator.influx.ServiceAndOpCodeAccumulator;
+import com.ai.risk.analysis.modules.collect.accumulator.influx.ServiceAndInstanceAccumulator;
+import com.ai.risk.analysis.modules.collect.accumulator.influx.ServiceAndIpAccumulator;
+import com.ai.risk.analysis.modules.collect.accumulator.influx.ServiceAndOpCodeAccumulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

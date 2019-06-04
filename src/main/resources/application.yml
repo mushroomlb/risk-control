@@ -23,6 +23,11 @@ spring:
     opcode-table: opcode
     ttl: 15552000
 
+  datasource:
+      url: jdbc:oracle:thin:@10.168.145.110:1521:logdb1
+      username: ucr_log
+      password: Ynyd!123
+
 risk:
   seperatorChar: '^'
   step: 10000

@@ -1,4 +1,4 @@
-package com.ai.risk.analysis.accumulator.hbase;
+package com.ai.risk.analysis.modules.collect.accumulator.hbase;
 
 import org.springframework.stereotype.Component;
 

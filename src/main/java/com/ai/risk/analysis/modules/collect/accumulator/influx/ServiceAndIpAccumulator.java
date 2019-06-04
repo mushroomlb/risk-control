@@ -1,4 +1,4 @@
-package com.ai.risk.analysis.accumulator.influx;
+package com.ai.risk.analysis.modules.collect.accumulator.influx;
 
 
 import org.slf4j.Logger;

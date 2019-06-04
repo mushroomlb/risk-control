@@ -1,6 +1,6 @@
-package com.ai.risk.analysis.accumulator.influx;
+package com.ai.risk.analysis.modules.collect.accumulator.influx;
 
-import com.ai.risk.analysis.accumulator.CntUnit;
+import com.ai.risk.analysis.modules.collect.accumulator.CntUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Point;

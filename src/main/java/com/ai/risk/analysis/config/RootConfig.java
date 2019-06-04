@@ -1,6 +1,6 @@
 package com.ai.risk.analysis.config;
 
-import com.ai.risk.analysis.accumulator.CntUnit;
+import com.ai.risk.analysis.modules.collect.accumulator.CntUnit;
 import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;

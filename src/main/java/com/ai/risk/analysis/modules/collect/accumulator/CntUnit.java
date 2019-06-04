@@ -1,4 +1,4 @@
-package com.ai.risk.analysis.accumulator;
+package com.ai.risk.analysis.modules.collect.accumulator;
 
 import java.util.concurrent.atomic.AtomicLong;
 

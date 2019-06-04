@@ -1,7 +1,7 @@
-package com.ai.risk.analysis.task;
+package com.ai.risk.analysis.modules.collect.task;
 
-import com.ai.risk.analysis.accumulator.hbase.OpCodeAccumulator;
-import com.ai.risk.analysis.accumulator.hbase.ServiceAccumulator;
+import com.ai.risk.analysis.modules.collect.accumulator.hbase.OpCodeAccumulator;
+import com.ai.risk.analysis.modules.collect.accumulator.hbase.ServiceAccumulator;
 import com.ai.risk.analysis.lijun.bean.CallCountUnit;
 import com.ai.risk.analysis.lijun.util.HbaseOps;
 import org.apache.commons.lang3.time.DateFormatUtils;
