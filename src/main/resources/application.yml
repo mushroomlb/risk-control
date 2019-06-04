@@ -1,0 +1,43 @@
+server:
+  port: 8888
+
+logging:
+  level:
+    root: info
+
+spring:
+  kafka:
+    listener:
+      concurrency: 12
+    consumer:
+      enable-auto-commit: false
+      group-id: risk
+      auto-offset-reset: latest
+      bootstrap-servers: 10.173.245.211:9092,10.173.245.212:9092,10.173.245.213:9092,10.173.245.214:9092
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  hbase:
+    zookeeper:
+      server-list: 10.174.25.117:2181,10.174.25.118:2181,10.174.25.119:2181,10.174.25.120:2181,10.174.25.121:2181
+    service-talbe: SERVICE_INFO
+    opcode-table: OPCODE_INFO
+
+risk:
+  seperatorChar: '^'
+  step: 10000
+  needPause: false
+  sleepmillis: 10
+  entrance:
+    name: CSF
+  redisAccumulator:
+    threshold: 6
+
+lifecycle:
+  hourTimeout: 2
+  check:
+    initialDelay: 10000
+    fixedRate: 600000
+
+bean:
+  service: 1
+  opcode: 2

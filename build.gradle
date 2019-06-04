@@ -37,21 +37,8 @@ dependencies {
     compile 'org.springframework.kafka:spring-kafka:1.0.6.RELEASE'
     compile 'org.apache.commons:commons-lang3:3.8.1'
     compile 'org.influxdb:influxdb-java:2.15'
-
-    compile('org.springframework.data:spring-data-hadoop-boot:2.5.0.RELEASE') {
-        exclude group: 'javax.servlet', module: 'servlet-api'
-    }
-    compile('org.springframework.data:spring-data-hadoop:2.5.0.RELEASE') {
-        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
-        exclude group: 'log4j', module: 'log4j'
-        exclude group: 'javax.servlet', module: 'servlet-api'
-    }
-    compile('org.apache.hbase:hbase-client:1.4.4') {
-        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
-        exclude group: 'log4j', module: 'log4j'
-        exclude group: 'javax.servlet', module: 'servlet-api'
-    }
-
+    compile 'org.apache.hbase:hbase-client:1.2.6.1'
+    compile 'org.apache.hbase:hbase-common:1.2.6.1'
     compileOnly 'org.projectlombok:lombok'
     testCompile 'org.springframework.boot:spring-boot-starter-test'
     testCompile 'org.springframework.kafka:spring-kafka-test'
