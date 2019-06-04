@@ -1,4 +1,4 @@
-package com.ai.risk.analysis.source;
+package com.ai.risk.analysis.consumer;
 
 import com.ai.risk.analysis.accumulator.influx.ServiceAndInstanceAccumulator;
 import com.ai.risk.analysis.accumulator.influx.ServiceAndIpAccumulator;
