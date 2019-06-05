@@ -39,13 +39,13 @@ dependencies {
     compile 'org.influxdb:influxdb-java:2.15'
     compile('org.apache.hbase:hbase-client:1.2.6.1') {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
-        exclude group: 'log4j', module: 'log4j'
+        //exclude group: 'log4j', module: 'log4j'
         exclude group: 'javax.servlet', module: 'servlet-api'
     }
 
     compile('org.apache.hbase:hbase-common:1.2.6.1') {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
-        exclude group: 'log4j', module: 'log4j'
+        //exclude group: 'log4j', module: 'log4j'
         exclude group: 'javax.servlet', module: 'servlet-api'
     }
 
@@ -55,11 +55,10 @@ dependencies {
     compile 'com.alibaba:druid-spring-boot-starter:1.1.16'
     compile fileTree(dir: 'lib', include: ['*.jar'])
 
+    compileOnly 'org.projectlombok:lombok:1.14.8'
     testCompile 'org.springframework.boot:spring-boot-starter-test'
     testCompile 'com.baomidou:mybatis-plus-generator:3.1.0'
     testCompile 'org.freemarker:freemarker:2.3.23'
-
-    compileOnly 'org.projectlombok:lombok:1.14.8'
     testCompile 'org.springframework.boot:spring-boot-starter-test'
     testCompile 'org.springframework.kafka:spring-kafka-test'
 }

@@ -29,7 +29,7 @@ spring:
       password: Ynyd!123
 
 risk:
-  threshold: 3
+  threshold: 1.2
   seperatorChar: '^'
   step: 10000
   needPause: false

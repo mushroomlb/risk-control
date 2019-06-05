@@ -1,7 +1,7 @@
 package com.ai.risk.analysis.modules.warning.service.impl;
 
-import com.ai.risk.analysis.modules.warning.entity.unit.CallUnit;
 import com.ai.risk.analysis.modules.warning.entity.po.Warning;
+import com.ai.risk.analysis.modules.warning.entity.unit.CallUnit;
 import com.ai.risk.analysis.modules.warning.mapper.WarningMapper;
 import com.ai.risk.analysis.modules.warning.service.IWarningSV;
 import com.ai.risk.analysis.modules.warning.util.HbaseOps;
@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -27,7 +26,7 @@ import java.util.List;
 
 /**
  * <p>
- *  服务实现类
+ * 服务实现类
  * </p>
  *
  * @author Steven
@@ -37,94 +36,108 @@ import java.util.List;
 @Service
 public class WarningServiceImpl extends ServiceImpl<WarningMapper, Warning> implements IWarningSV {
 
-    /**
-     * hbase生命周期
-     */
-    @Value("${spring.hbase.ttl}")
-    private int ttl;
+	/**
+	 * hbase生命周期
+	 */
+	@Value("${spring.hbase.ttl}")
+	private int ttl;
 
-    /**
-     * 阈值
-     */
-    @Value("${risk.threshold}")
-    private int threshold;
+	/**
+	 * 阈值
+	 */
+	@Value("${risk.threshold}")
+	private double threshold;
 
-    /**
-     * 预警分析
-     *
-     * @param tableName
-     * @param timestamp
-     * @param list
-     * @throws ParseException
-     */
-    @Override
-    public void warning(String tableName, String timestamp, List<CallUnit> list) throws Exception {
+	private static final int DAYS_30 = 30;
 
-        if (CollectionUtils.isEmpty(list)) {
-            return;
-        }
+	/**
+	 * 预警分析
+	 *
+	 * @param tableName
+	 * @param timestamp
+	 * @param list
+	 * @throws ParseException
+	 */
+	@Override
+	public void warning(String tableName, String timestamp, List<CallUnit> list) throws Exception {
 
-        Date date = DateUtils.parseDate(timestamp, "yyyyMMddHH");
-        Date previousDate = DateUtils.addDays(date, -1);
+		if (CollectionUtils.isEmpty(list)) {
+			return;
+		}
 
-        for (CallUnit callUnit : list) {
+		Date date = DateUtils.parseDate(timestamp, "yyyyMMddHH");
 
-            int days = 0;
-            int cnt = 0;
-            int allDays = 1;
+		for (CallUnit callUnit : list) {
 
-            String name = callUnit.getName();
-            do {
+			int days = 0;
+			int cnt = 0;
+			int allDays = 1;
 
-                String rowKey = DateFormatUtils.format(previousDate, "yyyyMMddHH") + "-" + name;
-                date = previousDate;
-                Result result = selectByRowKey(tableName, rowKey);
-                if (!result.isEmpty()) {
-                    // 如果该条统计数据没有异常被预警，则计入统计平均值
-                    if (!isWaringData(rowKey)) {
-                        cnt += Integer.valueOf(Bytes.toString(result.getValue(HbaseOps.CF_BASE, HbaseOps.COL_CNT)));
-                        days++;
-                    }
-                }
-                allDays++;
-                if (allDays >= ttl / 24 / 60 / 60) {
-                    break;
-                }
-            } while (days < 30);
+			String name = callUnit.getName();
+			while (days < DAYS_30) {
+				Date previousDate = DateUtils.addDays(date, -1);
+				String rowKey = DateFormatUtils.format(previousDate, "yyyyMMddHH") + "-" + name;
+				date = previousDate;
 
-            long currCount = Long.valueOf(callUnit.getCount());
-            long average = cnt / days;
-            if (((currCount - average) / average) > threshold) {
-                // 如果超过设定阈值则插入预警表
-                insertWaring(callUnit);
-            }
-        }
-    }
+				Result result = selectByRowKey(tableName, rowKey);
+				if (!result.isEmpty()) {
+					if (isWaringData(rowKey)) {
+						// 只有没有预警过的数据才计入平均值统计
+						continue;
+					}
 
-    private void insertWaring(CallUnit callUnit) throws SQLException, ClassNotFoundException {
-        Warning warning = new Warning();
-        warning.setName(callUnit.getName());
-        warning.setCnt(callUnit.getCount());
-        warning.setIsWarning("N");
-        warning.setCreateDate(LocalDateTime.now());
-        save(warning);
-    }
+					cnt += Integer.valueOf(Bytes.toString(result.getValue(HbaseOps.CF_BASE, HbaseOps.COL_CNT)));
+					days++;
+				}
 
-    private boolean isWaringData(String name) throws SQLException, ClassNotFoundException {
-        QueryWrapper<Warning> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(Warning::getName, name);
-        int ret = count(queryWrapper);
-        if (0 == ret) {
-            return false;
-        }
-        return true;
-    }
+				allDays++;
+				if (allDays >= ttl / 24 / 60 / 60) {
+					break;
+				}
+			}
 
-    private Result selectByRowKey(String tableName, String rowKey) throws IOException {
-        HTable hTable = HbaseOps.getHbaseTable(tableName);
-        Get get = new Get(Bytes.toBytes(rowKey));
-        Result result = hTable.get(get);
-        return result;
-    }
+			long currCount = callUnit.getCount();
+			long average = cnt / days;
+			if (((currCount - average) / average) > threshold) {
+				// 如果超过设定阈值则插入预警表
+				insertWaring(callUnit);
+
+				String msg = String.format("%s 调用预警, %s 被调次数: %d, 前30天均值: %d", tableName, callUnit.getName(), currCount, average);
+				log.info(msg);
+			}
+		}
+	}
+
+	private void insertWaring(CallUnit callUnit) {
+		Warning warning = new Warning();
+		warning.setName(callUnit.getName());
+		warning.setCnt(callUnit.getCount());
+		warning.setIsWarning("N");
+		warning.setCreateDate(LocalDateTime.now());
+		save(warning);
+	}
+
+	/**
+	 * 是否预警过
+	 *
+	 * @param name
+	 * @return
+	 */
+	private boolean isWaringData(String name) {
+		QueryWrapper<Warning> queryWrapper = new QueryWrapper<>();
+		queryWrapper.lambda().eq(Warning::getName, name);
+		int ret = count(queryWrapper);
+		if (ret > 0) {
+			return true;
+		}
+		return false;
+	}
+
+	private Result selectByRowKey(String tableName, String rowKey) throws IOException {
+		HTable hTable = HbaseOps.getHbaseTable(tableName);
+		Get get = new Get(Bytes.toBytes(rowKey));
+		Result result = hTable.get(get);
+		return result;
+	}
 
 }
