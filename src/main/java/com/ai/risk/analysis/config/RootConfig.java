@@ -1,6 +1,6 @@
 package com.ai.risk.analysis.config;
 
-import com.ai.risk.analysis.modules.collect.accumulator.CntUnit;
+import com.ai.risk.analysis.modules.warning.entity.unit.PointUnit;
 import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
@@ -28,7 +28,7 @@ public class RootConfig {
 	}
 
 	@Bean
-	public Map<String, CntUnit> localCounter() {
+	public Map<String, PointUnit> localCounter() {
 		return new ConcurrentHashMap(100000000);
 	}
 

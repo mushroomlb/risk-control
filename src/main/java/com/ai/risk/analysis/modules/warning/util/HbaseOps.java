@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 提供hbase相关函数
@@ -38,51 +40,21 @@ public class HbaseOps {
     private String address;
 
     /**
-     * 预警信息统计表
-     */
-    @Value("${spring.hbase.warning-table}")
-    private String warningTable;
-
-    /**
-     * 统计类型-服务名
-     */
-    @Value("${bean.service}")
-    private String serviceName;
-
-    /**
-     * 统计类型-工号
-     */
-    @Value("${bean.opcode}")
-    private String opCode;
-
-    /**
      * hbase生命周期
      */
     @Value("${spring.hbase.ttl}")
     private static int ttl;
 
     /**
-     * oracle日志库url
-     */
-    @Value("${spring.datasource.url}")
-    private String url;
-
-    /**
-     * oracle日志库user
-     */
-    @Value("${spring.datasource.user}")
-    private String user;
-
-    /**
-     * oracle日志库password
-     */
-    @Value("${spring.datasource.password}")
-    private String password;
-
-    /**
      * 获取hbase表
      */
     public static HTable getHbaseTable(String tableName) throws IOException {
+
+        HTable table = HTABLE_MAP.get(tableName);
+        if (null != table) {
+            return table;
+        }
+
         TableName tName = TableName.valueOf(tableName);
         Admin admin = connection.getAdmin();
         if (!admin.tableExists(tName)) {
@@ -92,9 +64,13 @@ public class HbaseOps {
             tableDescriptor.addFamily(hColumnDescriptor);
             admin.createTable(tableDescriptor);
         }
-        HTable table = (HTable) connection.getTable(tName);
+        table = (HTable) connection.getTable(tName);
         table.setAutoFlushTo(false);
+        HTABLE_MAP.put(tableName, table);
+
         return table;
     }
+
+    private static final Map<String, HTable> HTABLE_MAP = new HashMap<>();
 
 }

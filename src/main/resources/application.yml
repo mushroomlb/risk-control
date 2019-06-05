@@ -19,7 +19,7 @@ spring:
   hbase:
     zookeeper:
       server-list: 10.174.25.117:2181,10.174.25.118:2181,10.174.25.119:2181,10.174.25.120:2181,10.174.25.121:2181
-    service-talbe: service
+    service-table: service
     opcode-table: opcode
     ttl: 15552000
 
@@ -29,6 +29,7 @@ spring:
       password: Ynyd!123
 
 risk:
+  threshold: 3
   seperatorChar: '^'
   step: 10000
   needPause: false
@@ -37,12 +38,6 @@ risk:
     name: CSF
   redisAccumulator:
     threshold: 6
-
-lifecycle:
-  hourTimeout: 2
-  check:
-    initialDelay: 10000
-    fixedRate: 600000
 
 bean:
   service: 1
