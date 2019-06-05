@@ -2,8 +2,10 @@ package com.ai.risk.analysis.modules.collect.task;
 
 import com.ai.risk.analysis.modules.collect.accumulator.hbase.OpCodeAccumulator;
 import com.ai.risk.analysis.modules.collect.accumulator.hbase.ServiceAccumulator;
-import com.ai.risk.analysis.lijun.bean.CallCountUnit;
-import com.ai.risk.analysis.lijun.util.HbaseOps;
+import com.ai.risk.analysis.modules.collect.entity.po.CallCountUnit;
+import com.ai.risk.analysis.modules.warning.service.IOpcodeAccumulatorService;
+import com.ai.risk.analysis.modules.warning.service.IServiceAccumulatorService;
+import com.ai.risk.analysis.modules.warning.service.IWarningService;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,7 +26,13 @@ import java.util.concurrent.atomic.AtomicLong;
 public class HBaseSinkTask {
 
 	@Autowired
-	private HbaseOps hbaseOps;
+	private IServiceAccumulatorService serviceAccumulatorService;
+
+	@Autowired
+	private IOpcodeAccumulatorService opcodeAccumulatorService;
+
+	@Autowired
+	private IWarningService warningService;
 
 	@Autowired
 	private ServiceAccumulator serviceAggregate;
@@ -45,31 +53,34 @@ public class HBaseSinkTask {
 		List<CallCountUnit> serviceList = new ArrayList();
 		List<CallCountUnit> opcodeList = new ArrayList();
 		for (String svcName : serviceLocalCounts.keySet()) {
-			String cnt = serviceLocalCounts.get(svcName).toString();
-
+			long cnt = serviceLocalCounts.get(svcName).get();
 			CallCountUnit unit = new CallCountUnit();
 			unit.setName(svcName);
-			unit.setNumber(cnt);
+			unit.setCount(cnt);
 			serviceList.add(unit);
-
-			hbaseOps.serviceAccumulator(now, serviceList);
-
 		}
 		serviceLocalCounts.clear();
 
 		for (String opCode : opCodeLocalCounts.keySet()) {
-			String cnt = opCodeLocalCounts.get(opCode).toString();
+			long cnt = opCodeLocalCounts.get(opCode).get();
 			CallCountUnit unit = new CallCountUnit();
 			unit.setName(opCode);
-			unit.setNumber(cnt);
+			unit.setCount(cnt);
+			unit.setCount(cnt);
 			opcodeList.add(unit);
-
-			hbaseOps.opcodeAccumulator(now, opcodeList);
-
 		}
 		opCodeLocalCounts.clear();
 
-		System.out.println("HBaseSinkTask.scheduled...");
+		// 开始预警分析
+		serviceAccumulatorService.serviceAccumulator(now, serviceList);
+		opcodeAccumulatorService.opcodeAccumulator(now, opcodeList);
+		try {
+			warningService.warning("service", now, serviceList);
+			warningService.warning("opcode", now, opcodeList);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 }

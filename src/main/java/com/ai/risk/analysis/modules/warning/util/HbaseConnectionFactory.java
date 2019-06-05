@@ -1,4 +1,4 @@
-package com.ai.risk.analysis.lijun.factory;
+package com.ai.risk.analysis.modules.warning.util;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;

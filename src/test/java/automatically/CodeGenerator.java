@@ -10,7 +10,6 @@ import com.baomidou.mybatisplus.generator.config.*;
 import com.baomidou.mybatisplus.generator.config.po.TableFill;
 import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
 import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
-import com.ai.risk.analysis.framework.common.BaseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,9 +25,9 @@ import java.util.Scanner;
  * @author Steven
  * @since 2019-04-24
  */
-public class MySQLGenerator {
+public class CodeGenerator {
 
-    private static final Logger log = LoggerFactory.getLogger(MySQLGenerator.class);
+    private static final Logger log = LoggerFactory.getLogger(CodeGenerator.class);
 
     /**
      * 以下是代码生成前需要修改的部分:
